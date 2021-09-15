@@ -3,6 +3,8 @@
 Documentos úteis:
 
 Pinout do STM32:
+
+
 ![stm32](https://user-images.githubusercontent.com/57239825/133519883-b1561b59-c3d5-4368-9be0-72261e958f43.jpg)
 
 Esquemático da Placa:
