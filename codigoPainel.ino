@@ -10,28 +10,28 @@
 #include <Wire.h> //biblioteca que implementa a I2C no arduino
 
 // Pinos conectados nos transistores que fecham o circuito das barras de LED: RPM e combustível
-#define BAR_RPM 45
-#define BAR_CMB 46
+#define BAR_RPM PA11
+#define BAR_CMB PA10
 // Pinos conectados no CI 4514 (Multiplexador das Barras de LED: RPM e combustível)
-#define MULT_A0 25
-#define MULT_A1 26
-#define MULT_A3 27
-#define MULT_A2 28
+#define MULT_A0 PB12
+#define MULT_A1 PB13
+#define MULT_A3 PB14
+#define MULT_A2 PB15
 // Pinos conectados no CI 7447 (Codificação do display de 7 segmentos)
-#define CI_DISPB 19
-#define CI_DISPC 18
-#define CI_DISPD 17
-#define CI_DISPA 16
+#define CI_DISPB PB1
+#define CI_DISPC PB0
+#define CI_DISPD PA7
+#define CI_DISPA PA6
 // Pinos que fecham o circuito do transistor dos displays de 7 segmentos (velocidade)
-#define VEL_DISP1 29 //dezenas
-#define VEL_DISP2 30 //unidades
+#define VEL_DISP1 PA8 //dezenas
+#define VEL_DISP2 PA9 //unidades
 // Pinos dos LED's individuais
-#define LED1 4
-#define LED2 3
-#define LED3 2
-#define LED4 39
-#define LED5 40
-#define LED6 41
+#define LED1 PC15
+#define LED2 PC14
+#define LED3 PC13
+#define LED4 PB3
+#define LED5 PB4
+#define LED6 PB5
 
 char buf[6] = ""; //buffer de recebimento das mensagens via I2C
 const byte endSlave = 8; //endereço do slave para o qual a I2C enviara os dados
@@ -315,24 +315,32 @@ void barraLeds(int nroLed)  //acende o respectivo led na barra de LED de acordo 
 
 void disp_led(int nLED)
 { 
-  switch(nLED)
+  int nLED1 = 0, nLED2 = 0;
+  nLED1 = nLED / 10; //primeiro bit ; nro do led que irá acender ou apagar
+  nLED2 = nLED % 10; //segundo bit ; se for igual a 1 acende, se for igual a 0 apaga
+  
+  if(nLED2 =! 0 || nLED2 =! 1)
+    imprimeBuffer(); //erro
+    
+  
+  switch(nLED1) //qual led irá acender ou apagar
     case 1:
-      digitalWrite(LED1, HIGH);
+      digitalWrite(LED1, nLED2);
       break;
     case 2:
-      digitalWrite(LED2, HIGH);
+      digitalWrite(LED2, nLED2);
       break;
     case 3:
-      digitalWrite(LED3, HIGH);
+      digitalWrite(LED3, nLED2);
       break;  
     case 4:
-      digitalWrite(LED4, HIGH);
+      digitalWrite(LED4, nLED2);
       break;      
     case 5:
-      digitalWrite(LED5, HIGH);
+      digitalWrite(LED5, nLED2);
       break;  
     case 6:
-      digitalWrite(LED6, HIGH);
+      digitalWrite(LED6, nLED2);
       break;
 }
 
