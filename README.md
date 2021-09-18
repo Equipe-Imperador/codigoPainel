@@ -18,7 +18,6 @@ Datasheet CI 7447:
 
 Funcionamento protocolo I2C:
 https://www.circuitbasics.com/basics-of-the-i2c-communication-protocol/
-https://www.youtube.com/watch?v=6IAkYpmA1DQ
 
 Biblioteca Wire:
 https://www.arduino.cc/en/reference/wire
