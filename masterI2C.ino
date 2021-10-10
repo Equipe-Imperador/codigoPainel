@@ -16,7 +16,7 @@ void loop()
   Wire.beginTransmission(endSlave); // transmite para o device #8 (Painel)
   // simulando envio de velocidade
   Wire.write("v");        
-  Wire.write(leituraVelocidade);   
+  Wire.write(leituraVelocidade());   
   Wire.write(";"); //sinalizar fim da transmissão
   
   Wire.endTransmission();    // encerra transmissão
