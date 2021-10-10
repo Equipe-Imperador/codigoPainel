@@ -33,8 +33,19 @@
 #define LED5 PB4
 #define LED6 PB5
 
-char buf[6] = ""; //buffer de recebimento das mensagens via I2C
-const byte endSlave = 8; //endereço do slave para o qual a I2C enviara os dados
+// Funções
+void inputI2C(); // Leitura da I2C
+void AcionaI2C(unsigned char*, int*); // Acionamento do painel com base na mensagem enviada
+void disp_velocidade(int); // Mostra o valor da velocidade no painel
+void disp_cmb(int); // Aciona a barra do combustível e mostra o valor
+void disp_rpm(int); // Aciona a barra do RPM e mostra o valor
+void disp_led(int); // Aciona os LEDs críticos
+void barraLeds(int); // Aciona a barra de LED
+void imprimeBuffer(); // Imprime a mensagem do buffer
+
+unsigned char buf[2] = ""; //buffer de recebimento das mensagens via I2C
+int valor = 0; // variável para armazenar o valor da msg I2C
+const byte endSlave = 0x10; //endereço do slave para o qual a I2C enviara os dados
 bool flagBuffer = LOW;
 int delayVeloc = 4; //tempo que o display de velocidade fica ligado
 int delayBarLED = 2; //tempo de delay entre os acionamentos das barras de LED (combustivel e rpm)
@@ -43,8 +54,8 @@ void setup()
 {
   Serial.begin(9600);
   Wire.begin(endSlave);    //testar sem input
-  Wire.onRequest(inputI2C);//funcao alvo que sera executada quando o master enviar dados
-  Wire.onReceive(inputI2C);
+  //Wire.onRequest(inputI2C);//funcao alvo que sera executada quando o master enviar dados
+  //Wire.onReceive(inputI2C);
 
   pinMode(BAR_RPM, OUTPUT);
   pinMode(BAR_CMB, OUTPUT);
@@ -69,70 +80,66 @@ void setup()
 
 void loop() 
 {
-  if(flagBuffer == HIGH)  //se for recebido dado na I2C
-  {
-    tratamentoBuf(buf[0]);  //funcao invocada para tratar o dado recebido
-  }
-
+  
 }
 
-void inputI2C(int nEventos) //parâmetro de quantos data frames foram enviados
+void inputI2C() // Leitura da mensagem I2C
 {
-  for (int i = 0; i < nEventos; i++)
+  int i = 0;
+  while(Wire.available() > 1) // Lê até chegar no ultimo byte de dados
   {
-    buf[i] = Wire.read();  //copia para o buffer enquanto tiver dados sendo transmitidos
+    buf[i] = Wire.read(); // Leitura dos char da mensagem
   }
-  flagBuffer = HIGH; // sinaliza que novos dados foram recebidos e a recepção foi finalizada
+
+  valor = Wire.read(); // Lê o ultimo byte que será sempre um int
+  imprimeBuffer();
+  AcionaI2C(buf,&valor);
 }
 
-void disp_velocidade()
+void AcionaI2C(unsigned char* ID, int* Dado)
 {
-  char bufAux[N]; //buffer auxiliar para copiar os dados do buffer original sem altera-lo
-  int i = 1; //começa na segunda posição da string pois o primeiro dado já foi lido
-  int j = 0; 
-  
-  while(buf[i] =! ';') //leitura dos dados até o final da string
+  if(ID[0] == "C") // Críticos
+  {
+    if(ID[1] == "B") // Bateira
     {
-      bufAux[j] = buf[i];
-      j++;
-      i++;
+      if((*Dado) == 1)
+      {
+        disp_led(11);
+      }
+      else 
+        disp_led(10);
     }
-    
- }
-
-void tratamentoBuf(char destino)
-{
-  char bufAux[N]; //buffer auxiliar para copiar os dados do buffer original sem altera-lo
-  int i = 1; //começa na segunda posição da string pois o primeiro dado já foi lido
-  int j = 0; 
-  int valorLido = 0;
-  
-  while(buf[i] =! ';') //leitura dos dados até o final da string
+    else if(ID[1] == "F") // Freio estacionário
     {
-      bufAux[j] = buf[i];
-      j++;
-      i++;
+      if((*Dado) == 1)
+      {
+        disp_led(21);
+      }
+      else
+        disp_led(20);
     }
-    
-  valorLido = atoi(BufAux); //conversão do numero lido de string para inteiro
-
-  switch(destino) //leitura de acordo com a codificação;
-    case 'v':
-      disp_velocidade(valorLido); 
-      break;
-    case 'r':
-      disp_rpm(valorLido);
-      break;
-    case 'l':
-      disp_led(valorLido);
-      break;
-    case 'c':
-      disp_cmb(valorLido);
-      break;
-    default
-      //caracter invalido
-      imprimeBuffer();
-      break;
+    else if(ID[1] == "T") // Temperatura CVT
+    {
+      if((*Dado) == 1)
+      {
+        disp_led(31);
+      }
+      else
+        disp_led(30);
+    }
+  }
+  else if(ID[0] == "L") // Gasolina
+  {
+    disp_cmb(*Dado);
+  }
+  else if(ID[0] == "R") // RPM
+  {
+    disp_rpm(*Dado);
+  }
+  else if(ID[0] == "V") // Velocidade
+  {
+    disp_velocidade(*Dado);
+  }
 }
 
 void disp_velocidade(int velocidade)
@@ -233,6 +240,10 @@ void disp_cmb(int nroLED)
   digitalWrite(BAR_RPM, LOW);
   digitalWrite(BAR_CMB, HIGH);
   barraLeds(nroLED); //valor de 1 a 12 correspondente ao led que será acendido
+  if(nroLED <= 4)
+    disp_led(41);
+  else
+    disp_led(40);
   delay(delayBarLED);
 }
 
@@ -349,7 +360,7 @@ void imprimeBuffer() //funcao teste para verificar funcionamento do código
 {
   while(buf[i] =! ';') //leitura dos dados até o final da string
     {
-      Serial.print(buff[i]);
+      Serial.print(buf[i]);
       Serial.println();
     }  
 }
