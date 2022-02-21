@@ -269,7 +269,7 @@ void disp_led(int nLED)
   nLED2 = nLED % 10; //segundo bit ; se for igual a 1 acende, se for igual a 0 apaga
   
   if(nLED2 =! 0 || nLED2 =! 1)
-    imprimeBuffer(); //erro
+    break; // erro
     
   
   switch(nLED1) //qual led irá acender ou apagar
