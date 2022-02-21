@@ -27,6 +27,7 @@
 bool flagBuffer = LOW;
 int delayVeloc = 4; //tempo que o display de velocidade fica ligado
 int delayBarLED = 2; //tempo de delay entre os acionamentos das barras de LED (combustivel e rpm)
+int tempoDelay = 50; //tempo delay geral
 
 void setup() 
 {
@@ -66,15 +67,20 @@ void testeInicial()
   for(int i=0;i<100;i++)
   {
     disp_velocidade(i); 
+    delay(tempoDelay);
   }
   for (int i=0;i<=12;i++)
   {
     disp_rpm(i);
+    delay(tempoDelay);
     disp_cmb(i);
+    delay(tempoDelay);
   }
   for (int i=0;i<=6;i++)
   {
-    disp_led(i)
+    disp_led(i,i*10 +1);
+    delay(tempoDelay);
+    disp_led(i,i*10);
   }  
 }
 
